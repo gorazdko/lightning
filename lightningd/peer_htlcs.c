@@ -23,6 +23,7 @@
 #include <lightningd/jsonrpc.h>
 #include <lightningd/lightningd.h>
 #include <lightningd/log.h>
+#include <lightningd/notification.h>
 #include <lightningd/options.h>
 #include <lightningd/pay.h>
 #include <lightningd/peer_control.h>
@@ -100,6 +101,7 @@ static void fail_in_htlc(struct htlc_in *hin,
 			 const struct onionreply *failuremsg,
 			 const struct short_channel_id *out_channelid)
 {
+	struct lightningd *ld = hin->key.channel->peer->ld;
 	struct failed_htlc failed_htlc;
 	assert(!hin->preimage);
 
@@ -134,6 +136,8 @@ static void fail_in_htlc(struct htlc_in *hin,
 	subd_send_msg(hin->key.channel->owner,
 		      take(towire_channel_fail_htlc(NULL, &failed_htlc,
 						    get_block_height(hin->key.channel->owner->ld->topology))));
+
+        notify_htlc_failed(ld, hin->key.channel->scid, &failed_htlc);
 }
 
 /* This is used for cases where we can immediately fail the HTLC. */
@@ -1100,6 +1104,8 @@ static bool peer_failed_our_htlc(struct channel *channel,
 	log_debug(channel->log, "Our HTLC %"PRIu64" failed (%u)", failed->id,
 		  hout->failcode);
 	htlc_out_check(hout, __func__);
+
+	notify_htlc_failed(ld, channel->scid, failed);
 
 	if (hout->in)
 		wallet_forwarded_payment_add(ld->wallet, hout->in,

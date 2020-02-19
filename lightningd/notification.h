@@ -8,6 +8,7 @@
 #include <ccan/time/time.h>
 #include <common/amount.h>
 #include <common/errcode.h>
+#include <common/htlc_wire.h>
 #include <common/node_id.h>
 #include <lightningd/htlc_end.h>
 #include <lightningd/jsonrpc.h>
@@ -70,5 +71,18 @@ void notify_sendpay_failure(struct lightningd *ld,
 			    const struct onionreply *onionreply,
 			    const struct routing_failure *fail,
 			    const char *errmsg);
+
+void notify_htlc_failed(struct lightningd *ld,
+			 const struct short_channel_id *scid,
+			 const struct failed_htlc *failed);
+
+void notify_htlc_settled(struct lightningd *ld,
+			  const struct short_channel_id * scid,
+			  const struct fulfilled_htlc *fulfilled);
+
+void notify_htlc_accepted(struct lightningd *ld,
+			   struct htlc_accepted_plugin_payload *p);
+
+void notify_htlc_offered(struct lightningd *ld, const struct htlc_out *hout);
 
 #endif /* LIGHTNING_LIGHTNINGD_NOTIFICATION_H */
