@@ -244,6 +244,8 @@ void fulfill_htlc(struct htlc_in *hin, const struct preimage *preimage)
 	u8 *msg;
 	struct channel *channel = hin->key.channel;
 	struct wallet *wallet = channel->peer->ld->wallet;
+	struct lightningd *ld = channel->peer->ld;
+	struct fulfilled_htlc fulfilled_htlc;
 
 	if (hin->hstate != RCVD_ADD_ACK_REVOCATION) {
 		log_debug(channel->log,
@@ -273,13 +275,14 @@ void fulfill_htlc(struct htlc_in *hin, const struct preimage *preimage)
 
 	if (channel_on_chain(channel)) {
 		msg = towire_onchain_known_preimage(hin, preimage);
-	} else {
-		struct fulfilled_htlc fulfilled_htlc;
+	} else {	
 		fulfilled_htlc.id = hin->key.id;
 		fulfilled_htlc.payment_preimage = *preimage;
 		msg = towire_channel_fulfill_htlc(hin, &fulfilled_htlc);
 	}
 	subd_send_msg(channel->owner, take(msg));
+
+	notify_htlc_settled(ld, channel->scid,  &fulfilled_htlc);
 }
 
 static void handle_localpay(struct htlc_in *hin,
