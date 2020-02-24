@@ -20,6 +20,7 @@
 #include <wire/gen_onion_wire.h>
 
 struct onionreply;
+struct htlc_accepted_plugin_payload;
 
 bool notifications_have_topic(const char *topic);
 

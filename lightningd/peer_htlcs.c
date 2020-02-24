@@ -985,6 +985,7 @@ static bool peer_accepted_htlc(struct channel *channel, u64 id,
 	hook_payload->channel = channel;
 	hook_payload->next_onion = serialize_onionpacket(hook_payload, rs->next);
 
+	notify_htlc_accepted(ld, hook_payload);
 	plugin_hook_call_htlc_accepted(ld, hook_payload, hook_payload);
 
 	/* Falling through here is ok, after all the HTLC locked */
