@@ -499,6 +499,8 @@ enum onion_type send_htlc_out(struct channel *out,
 					onion_routing_packet);
 	subd_req(out->peer->ld, out->owner, take(msg), -1, 0, rcvd_htlc_reply, hout);
 
+	notify_htlc_offered(out->peer->ld, hout);
+
 	if (houtp)
 		*houtp = hout;
 	return 0;

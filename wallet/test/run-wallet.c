@@ -405,6 +405,9 @@ void notify_htlc_failed(struct lightningd *ld UNNEEDED,
 			 const struct short_channel_id *scid UNNEEDED,
 			 const struct failed_htlc *failed UNNEEDED)
 { fprintf(stderr, "notify_htlc_failed called!\n"); abort(); }
+/* Generated stub for notify_htlc_offered */
+void notify_htlc_offered(struct lightningd *ld UNNEEDED, const struct htlc_out *hout UNNEEDED)
+{ fprintf(stderr, "notify_htlc_offered called!\n"); abort(); }
 /* Generated stub for notify_htlc_settled */
 void notify_htlc_settled(struct lightningd *ld UNNEEDED,
 			  const struct short_channel_id * scid UNNEEDED,
