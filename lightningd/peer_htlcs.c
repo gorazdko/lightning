@@ -660,7 +660,7 @@ static void channel_resolve_reply(struct subd *gossip, const u8 *msg,
 /**
  * Data passed to the plugin, and as the context for the hook callback
  */
-struct htlc_accepted_hook_payload {
+struct htlc_accepted_plugin_payload {
 	struct route_step *route_step;
 	/* NULL if it couldn't be parsed! */
 	struct onion_payload *payload;
@@ -747,7 +747,7 @@ static enum htlc_accepted_result htlc_accepted_hook_deserialize(const char *buff
 	return result;
 }
 
-static void htlc_accepted_hook_serialize(struct htlc_accepted_hook_payload *p,
+void htlc_accepted_plugin_serialize(struct htlc_accepted_plugin_payload *p,
 					 struct json_stream *s)
 {
 	const struct route_step *rs = p->route_step;
@@ -809,7 +809,7 @@ static void htlc_accepted_hook_serialize(struct htlc_accepted_hook_payload *p,
  * Callback when a plugin answers to the htlc_accepted hook
  */
 static void
-htlc_accepted_hook_callback(struct htlc_accepted_hook_payload *request,
+htlc_accepted_hook_callback(struct htlc_accepted_plugin_payload *request,
 			    const char *buffer, const jsmntok_t *toks)
 {
 	struct route_step *rs = request->route_step;
@@ -882,9 +882,9 @@ htlc_accepted_hook_callback(struct htlc_accepted_hook_payload *request,
 
 REGISTER_PLUGIN_HOOK(htlc_accepted, PLUGIN_HOOK_CHAIN,
 		     htlc_accepted_hook_callback,
-		     struct htlc_accepted_hook_payload *,
-		     htlc_accepted_hook_serialize,
-		     struct htlc_accepted_hook_payload *);
+		     struct htlc_accepted_plugin_payload *,
+		     htlc_accepted_plugin_serialize,
+		     struct htlc_accepted_plugin_payload *);
 
 /**
  * Everyone is committed to this htlc of theirs
@@ -903,7 +903,7 @@ static bool peer_accepted_htlc(struct channel *channel, u64 id,
 	struct route_step *rs;
 	struct onionpacket op;
 	struct lightningd *ld = channel->peer->ld;
-	struct htlc_accepted_hook_payload *hook_payload;
+	struct htlc_accepted_plugin_payload *hook_payload;
 
 	hin = find_htlc_in(&ld->htlcs_in, channel, id);
 	if (!hin) {
@@ -976,7 +976,7 @@ static bool peer_accepted_htlc(struct channel *channel, u64 id,
 		return false;
 	}
 
-	hook_payload = tal(hin, struct htlc_accepted_hook_payload);
+	hook_payload = tal(hin, struct htlc_accepted_plugin_payload);
 
 	hook_payload->route_step = tal_steal(hook_payload, rs);
 	hook_payload->payload = onion_decode(hook_payload, rs);
